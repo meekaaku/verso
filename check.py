@@ -1,16 +1,14 @@
 #!/usr/bin/python
-from dynamixel_sdk import *
-from lib.mkDynamixel import mkDynamixel
+from dynamixel_sdk import PortHandler, PacketHandler
+from lib import mkDynamixel
 
 
-def tester():
-    return 1, 2, 3
 
-print("Hello")
 
-result = tester()
-print(result)
+portHandler = PortHandler('/dev/ttyUSB0')
+packetHandler = PacketHandler(1.0)
 
-j1 = mkDynamixel(1, 1, 1, 1)
+j1 = mkDynamixel(1, 'AX-12A', portHandler, packetHandler)
+
 j1.connect()
 
