@@ -39,6 +39,12 @@ class ControlTableAX12A:
         self.punch = AddressSize(48, 2)
 
 
+class mxResult:
+    def __init__(self, ok, data, error):
+        self.ok = ok
+        self.data = data
+        self.error = error
+
 
 class mkDynamixel:
     supported_models = ["AX-12A"]
@@ -68,18 +74,55 @@ class mkDynamixel:
             raise ValueError("Model " + str(model) + " is not supported")
 
 
+    def process(self, results):
+        """
+        Process a tuple of results and return a standardized response object.
+        
+        Args:
+            results: Tuple containing either (com_result, error) or (response, com_result, error)
+            
+        Returns:
+            ResultObject: An object with attributes:
+                - ok (bool): True if no errors (com_result and error are both 0)
+                - data: First element of 3-tuple if present, else None
+                - error (str): Error message if not ok, else None
+        """
+        # Determine if it's a 2-tuple or 3-tuple
+        is_three_tuple = len(results) == 3
+        
+        # Extract values
+        if is_three_tuple:
+            response, com_result, error = results
+        else:
+            com_result, error = results
+            response = None
+        
+        # Check if operation was successful
+        is_ok = com_result == 0 and error == 0
+        
+        return mxResult(
+            ok= is_ok,
+            data = response if is_three_tuple else None,
+            error = None if is_ok else 'an error occurred'
+        )
 
     def set_torque(self, onoff):
-        result, error = self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff)
+
+        #result, error = self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff)
+        response = self.process(self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff))
+        '''
         if result != 0:
-            raise ValueError("Failed to set torque")
-        return result, error
+            print("%s" % self.packet_handler.getTxRxResult(result))
+        elif error != 0:
+            print("%s" % self.packet_handler.getRxPacketError(error))
+        ''' 
 
 
     def set_position(self, position):
         dxl_comm_result, dxl_error = self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.goal_position.address, position)
         if dxl_comm_result != 0:
             print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
             print("%s" % self.packet_handler.getRxPacketError(dxl_error))
 
 
