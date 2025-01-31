@@ -60,6 +60,7 @@ class mkDynamixel:
         self.port_handler = port_handler
         self.packet_handler = packet_handler
 
+
         if self.model == "AX-12A":
             self.control_table = ControlTableAX12A()
         # TODO: Add other models
@@ -67,10 +68,24 @@ class mkDynamixel:
             raise ValueError("Model " + str(model) + " is not supported")
 
 
-    def connect(self):
-        print("Connecting to Dynamixel")
-        pass
 
-    def disconnect(self):
-        print("Disconnecting from Dynamixel")
-        pass
+    def set_torque(self, onoff):
+        result, error = self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff)
+        if result != 0:
+            raise ValueError("Failed to set torque")
+        return result, error
+
+
+    def set_position(self, position):
+        dxl_comm_result, dxl_error = self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.goal_position.address, position)
+        if dxl_comm_result != 0:
+            print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
+            print("%s" % self.packet_handler.getRxPacketError(dxl_error))
+
+
+    def get_position(self):
+        dxl_present_position, dxl_comm_result, dxl_error = self.packet_handler.read2ByteTxRx(self.port_handler, self.id, self.control_table.present_position.address)
+        if dxl_comm_result != 0:
+            print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("%s" % self.packet_handler.getRxPacketError(dxl_error))
