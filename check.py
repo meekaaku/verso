@@ -28,8 +28,8 @@ j1.set_torque(True)
 
 while True:
     j1.set_position(500)
-    time.sleep(1)
+    time.sleep(0.05)
     j1.set_position(700)
-    time.sleep(1)
+    time.sleep(0.25)
 
 
