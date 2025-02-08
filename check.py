@@ -6,6 +6,7 @@ import time
 
 
 
+<<<<<<< Updated upstream
 portHandler = PortHandler('/dev/ttyUSB0')
 if portHandler.openPort():
     pass
@@ -14,6 +15,10 @@ else:
     quit()
 
 
+=======
+portHandler = PortHandler('COM12')
+#portHandler = PortHandler('/dev/ttyUSB0')
+>>>>>>> Stashed changes
 packetHandler = PacketHandler(1.0)
 if portHandler.setBaudRate(1000000):
     pass
