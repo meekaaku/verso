@@ -58,9 +58,10 @@ PROTOCOL_VERSION            = 1.0               # See which protocol version is 
 
 # Default setting
 DXL_ID                      = 2                 # Dynamixel ID : 1
-DXL_ID2                      = 3                 # Dynamixel ID : 1
+DXL_ID2                      = 5                 # Dynamixel ID : 1
 BAUDRATE                    = 1000000           # Dynamixel default baudrate : 57600
-DEVICENAME                  = '/dev/ttyUSB0'    # Check which port is being used on your controller
+#DEVICENAME                  = '/dev/ttyUSB0'    # Check which port is being used on your controller 
+DEVICENAME                  = 'COM12'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 TORQUE_ENABLE               = 1                 # Value for enabling the torque
@@ -77,14 +78,13 @@ dxl_goal_position = [DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE]    
 # Set the port path
 # Get methods and members of PortHandlerLinux or PortHandlerWindows
 portHandler = PortHandler(DEVICENAME)
-portHandler2 = PortHandler(DEVICENAME)
-
+#portHandler2 = PortHandler(DEVICENAME)
 
 # Initialize PacketHandler instance
 # Set the protocol version
 # Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
 packetHandler = PacketHandler(PROTOCOL_VERSION)
-packetHandler2 = PacketHandler(PROTOCOL_VERSION)
+#packetHandler2 = PacketHandler(PROTOCOL_VERSION)
 
 
 # Open port
@@ -97,11 +97,11 @@ else:
     quit()
 
 
-if portHandler2.openPort():
-    print("Sccuess opening second port")
-else:
-    print ("Failed to open second port")
-    quit()
+#if portHandler2.openPort():
+#    print("Sccuess opening second port")
+#else:
+#    print ("Failed to open second port")
+#    quit()
 
 
 # Set port baudrate
@@ -113,13 +113,13 @@ else:
     getch()
     quit()
 
-if portHandler2.setBaudRate(BAUDRATE):
-    print("Succeeded 2 to change the baudrate")
-else:
-    print("Failed to change the baudrate for second")
-    print("Press any key to terminate...")
-    getch()
-    quit()
+#if portHandler2.setBaudRate(BAUDRATE):
+#    print("Succeeded 2 to change the baudrate")
+#else:
+#    print("Failed to change the baudrate for second")
+#    print("Press any key to terminate...")
+#    getch()
+#    quit(dd)
 
 
 
