@@ -6,19 +6,8 @@ import time
 
 
 
-<<<<<<< Updated upstream
-portHandler = PortHandler('/dev/ttyUSB0')
-if portHandler.openPort():
-    pass
-else:
-    print("Failed to open the port")
-    quit()
-
-
-=======
 portHandler = PortHandler('COM12')
 #portHandler = PortHandler('/dev/ttyUSB0')
->>>>>>> Stashed changes
 packetHandler = PacketHandler(1.0)
 if portHandler.setBaudRate(1000000):
     pass
@@ -33,8 +22,8 @@ j1.set_torque(True)
 
 while True:
     j1.set_position(500)
-    time.sleep(0.05)
+    time.sleep(1)
     j1.set_position(700)
-    time.sleep(0.25)
+    time.sleep(1)
 
 
