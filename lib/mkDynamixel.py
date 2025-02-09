@@ -87,6 +87,8 @@ class mkDynamixel:
                 - data: First element of 3-tuple if present, else None
                 - error (str): Error message if not ok, else None
         """
+
+        print ("Results are ", results)
         # Determine if it's a 2-tuple or 3-tuple
         is_three_tuple = len(results) == 3
         
@@ -99,11 +101,19 @@ class mkDynamixel:
         
         # Check if operation was successful
         is_ok = com_result == 0 and error == 0
-        
+
+        if(com_result != 0):
+            error =  self.packet_handler.getTxRxResult(com_result)
+            print("Err:l" + error)
+        elif(error != 0):
+            error = self.packet_handler.getRxPacketError(error)
+            print("Err:l" + error)
+
+
         return mxResult(
-            ok= is_ok,
+            ok = is_ok,
             data = response if is_three_tuple else None,
-            error = None if is_ok else 'an error occurred'
+            error = None if is_ok else 'Unknown error'
         )
 
     def set_torque(self, onoff):
@@ -119,6 +129,16 @@ class mkDynamixel:
 
 
     def set_position(self, position):
+        return self.process(self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.goal_position.address, position))
+
+    def get_position(self):
+        return self.process(self.packet_handler.read2ByteTxRx(self.port_handler, self.id, self.control_table.present_position.address))
+
+    def set_speed(self, speed):
+        return self.process(self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.moving_speed.address, speed))
+    
+
+    def set_position_old(self, position):
         dxl_comm_result, dxl_error = self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.goal_position.address, position)
         if dxl_comm_result != 0:
             print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
@@ -126,7 +146,7 @@ class mkDynamixel:
             print("%s" % self.packet_handler.getRxPacketError(dxl_error))
 
 
-    def get_position(self):
+    def get_position_old(self):
         dxl_present_position, dxl_comm_result, dxl_error = self.packet_handler.read2ByteTxRx(self.port_handler, self.id, self.control_table.present_position.address)
         if dxl_comm_result != 0:
             print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
