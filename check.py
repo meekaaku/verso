@@ -20,7 +20,7 @@ else:
 
 j1 = mkDynamixel(2, 'AX-12A', portHandler, packetHandler)
 j1.set_torque(True)
-j1.set_speed(10)
+j1.set_speed(300)
 
 pos = 500
 while True:
