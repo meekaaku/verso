@@ -39,14 +39,20 @@ class ControlTableAX12A:
         self.punch = AddressSize(48, 2)
 
 
-class mxResult:
+
+class mxRequest:
+    def __init__(self, command, data):
+        self.command = command
+        self.data = data
+
+class mxResponse:
     def __init__(self, ok, data, error):
         self.ok = ok
         self.data = data
         self.error = error
 
 
-class mkDynamixel:
+class mxDynamixel:
     supported_models = ["AX-12A"]
     def __init__(self, id, model, port_handler, packet_handler):
         if model not in self.supported_models:
@@ -110,16 +116,20 @@ class mkDynamixel:
             print("Err:l" + error)
 
 
-        return mxResult(
+        return mxResponse(
             ok = is_ok,
             data = response if is_three_tuple else None,
             error = None if is_ok else 'Unknown error'
         )
 
+
+    def ping():
+        return self.process(self.packet_handler.ping(self.port_handler, self.id))
+
     def set_torque(self, onoff):
 
         #result, error = self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff)
-        response = self.process(self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff))
+        return self.process(self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff))
         '''
         if result != 0:
             print("%s" % self.packet_handler.getTxRxResult(result))
