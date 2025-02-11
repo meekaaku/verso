@@ -1,1 +1,1 @@
-from .mxDynamixel import mkDynamixel
+from .mxDynamixel import mxDynamixel, mxRequest

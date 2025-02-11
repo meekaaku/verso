@@ -20,39 +20,51 @@ else:
 j1 = mxDynamixel(2, 'AX-12A', portHandler, packetHandler)
 j1.set_torque(True)
 j1.set_speed(300)
+j1.set_cw_limit(200)
+j1.set_ccw_limit(800)
 
-pos = 500
-request = None 
+response = j1.get_position()
+pos = response.data
+#request = mxRequest(0,0) 
+request = mxRequest(0,0)
+i = 0
+print("Verso ready. Press x to quit")
 while True:
     if keyboard.is_pressed('w'):
-        pos = pos + 50
+        pos = pos + 10
         request = mxRequest('set_position', pos)
-        print(j1.set_position(pos))
 
     if keyboard.is_pressed('s'):
-        pos = pos - 50
-        print(j1.set_position(pos))
+        pos = pos - 10
+        request = mxRequest('set_position', pos)
 
     if keyboard.is_pressed('q'):
         pos = 150
-        print(j1.set_position(pos))
+        request = mxRequest('set_position', pos)
 
     if keyboard.is_pressed('e'):
         pos = 850
-        print(j1.set_position(pos))
+        request = mxRequest('set_position', pos)
 
     if keyboard.is_pressed('p'):
         print(j1.ping())
+
+    if keyboard.is_pressed('x'):
+        exit()
         
 
 
     if(request.command == 'set_position'):
         response = j1.set_position(request.data)
+        response = j1.get_position()
+        i = i + 1
         if(response.ok):
-            print("set_position: ok")
+            print(str(i) + ") set_position: ok " + str(response.data))
         else:
-            print("set_position:" + response.error)
+            print(str(i) + ") set_position:" + response.error)
     
+
+    request = mxRequest(0,0)
     #if(response.ok):
     #    print("Set position ", pos)
     #    readpos = j1.get_position()

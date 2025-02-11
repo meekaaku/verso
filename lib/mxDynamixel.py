@@ -94,7 +94,6 @@ class mxDynamixel:
                 - error (str): Error message if not ok, else None
         """
 
-        print ("Results are ", results)
         # Determine if it's a 2-tuple or 3-tuple
         is_three_tuple = len(results) == 3
         
@@ -123,20 +122,11 @@ class mxDynamixel:
         )
 
 
-    def ping():
+    def ping(self):
         return self.process(self.packet_handler.ping(self.port_handler, self.id))
 
     def set_torque(self, onoff):
-
-        #result, error = self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff)
         return self.process(self.packet_handler.write1ByteTxRx(self.port_handler, self.id, self.control_table.torque_enable.address, onoff))
-        '''
-        if result != 0:
-            print("%s" % self.packet_handler.getTxRxResult(result))
-        elif error != 0:
-            print("%s" % self.packet_handler.getRxPacketError(error))
-        ''' 
-
 
     def set_position(self, position):
         return self.process(self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.goal_position.address, position))
@@ -147,18 +137,9 @@ class mxDynamixel:
     def set_speed(self, speed):
         return self.process(self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.moving_speed.address, speed))
     
+    def set_cw_limit(self, limit):
+        return self.process(self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.cw_angle_limit.address, limit))
 
-    def set_position_old(self, position):
-        dxl_comm_result, dxl_error = self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.goal_position.address, position)
-        if dxl_comm_result != 0:
-            print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % self.packet_handler.getRxPacketError(dxl_error))
-
-
-    def get_position_old(self):
-        dxl_present_position, dxl_comm_result, dxl_error = self.packet_handler.read2ByteTxRx(self.port_handler, self.id, self.control_table.present_position.address)
-        if dxl_comm_result != 0:
-            print("%s" % self.packet_handler.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % self.packet_handler.getRxPacketError(dxl_error))
+    def set_ccw_limit(self, limit):
+        return self.process(self.packet_handler.write2ByteTxRx(self.port_handler, self.id, self.control_table.ccw_angle_limit.address, limit))
+  
