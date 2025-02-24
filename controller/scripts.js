@@ -9,6 +9,10 @@ function startConnection() {
         statusElement.classList.add('connected');
     };
 
+    ws.onmessage = (event) => {
+        console.log("Received message", event.data);
+    };
+
     ws.onclose = () => {
         statusElement.textContent = 'Disconnected';
         statusElement.classList.remove('connected');

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .dial-container {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin: 50px;
+            touch-action: none; /* Prevents default touch behaviors */
+        }
+
+        .dial {
+            width: 100%;
+            height: 100%;
+            background: #333;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            -webkit-user-select: none; /* Prevents selection on touch */
+            user-select: none;
+        }
+
+        .dial-indicator {
+            width: 10px;
+            height: 30px;
+            background: #ff4444;
+            position: absolute;
+            left: 50%;
+            top: 10px;
+            transform-origin: 5px 90px;
+            transform: translateX(-50%) rotate(0deg);
+            border-radius: 5px;
+        }
+
+        .dial-center {
+            width: 40px;
+            height: 40px;
+            background: #666;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .label {
+            text-align: center;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin-top: 10px;
+        }
+
+        .value {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="dial-container">
+        <div class="dial" id="dial">
+            <div class="dial-indicator" id="indicator"></div>
+            <div class="dial-center"></div>
+        </div>
+        <div class="label">Servo Control</div>
+        <div class="value" id="value">0°</div>
+    </div>
+
+    <script>
+        const dial = document.getElementById('dial');
+        const indicator = document.getElementById('indicator');
+        const valueDisplay = document.getElementById('value');
+        let isDragging = false;
+        let currentAngle = 0;
+
+        // Mouse events
+        dial.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', rotateDial);
+        document.addEventListener('mouseup', stopDragging);
+
+        // Touch events
+        dial.addEventListener('touchstart', startDragging, { passive: false });
+        document.addEventListener('touchmove', rotateDial, { passive: false });
+        document.addEventListener('touchend', stopDragging);
+
+        function startDragging(e) {
+            e.preventDefault();
+            isDragging = true;
+        }
+
+        function stopDragging() {
+            isDragging = false;
+        }
+
+        function rotateDial(e) {
+            if (!isDragging) return;
+
+            let clientX, clientY;
+            
+            // Check if it's a touch event or mouse event
+            if (e.type === 'touchmove') {
+                e.preventDefault(); // Prevent scrolling
+                const touch = e.touches[0];
+                clientX = touch.clientX;
+                clientY = touch.clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const rect = dial.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const angle = Math.atan2(clientY - centerY, clientX - centerX) * 180 / Math.PI + 90;
+            currentAngle = (angle + 360) % 360;
+
+            indicator.style.transform = `translateX(-50%) rotate(${currentAngle}deg)`;
+            valueDisplay.textContent = `${Math.round(currentAngle)}°`;
+        }
+    </script>
+</body>
+</html>
