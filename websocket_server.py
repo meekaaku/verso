@@ -4,7 +4,7 @@ import asyncio
 import websockets
 
 # Define the WebSocket handler function
-async def echo_handler(websocket):
+async def handle_message(websocket):
     try:
         # Keep the connection open and listen for messages
         async for message in websocket:
@@ -14,6 +14,9 @@ async def echo_handler(websocket):
     except websockets.ConnectionClosed:
         print("Client disconnected")
 
+
+
+
 # Start the WebSocket server
 async def main():
     # Set host and port
@@ -22,7 +25,7 @@ async def main():
     
     # Create and start the server
     server = await websockets.serve(
-        echo_handler,
+        handle_message,
         host,
         port
     )
