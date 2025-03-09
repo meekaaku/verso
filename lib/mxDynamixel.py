@@ -1,8 +1,10 @@
+# Address and Size of a control table entry
 class AddressSize:
     def __init__(self, address, size):
         self.address = address
         self.size = size
 
+# Control Table for AX-12A
 class ControlTableAX12A:
     def __init__(self):
         self.model_number = AddressSize(0, 2)
@@ -38,13 +40,13 @@ class ControlTableAX12A:
         self.lock = AddressSize(47, 1)
         self.punch = AddressSize(48, 2)
 
-
-
+# Request object
 class mxRequest:
     def __init__(self, command, data):
         self.command = command
         self.data = data
 
+# Response object
 class mxResponse:
     def __init__(self, ok, data, error):
         self.ok = ok
@@ -53,7 +55,10 @@ class mxResponse:
 
 
 class mxDynamixel:
+    # For now we support only AX-12A
     supported_models = ["AX-12A"]
+    
+
     def __init__(self, id, model, port_handler, packet_handler):
         if model not in self.supported_models:
             raise ValueError("Model " + str(model) + " is not supported")
@@ -80,6 +85,8 @@ class mxDynamixel:
             raise ValueError("Model " + str(model) + " is not supported")
 
 
+    # Function to process the results of a packet handler
+    # The packet handler returns a tuple of results
     def process(self, results):
         """
         Process a tuple of results and return a standardized response object.

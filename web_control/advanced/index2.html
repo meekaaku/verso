@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Arm Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f0f0;
+            padding: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 40vh;
+            min-height: 200px;
+            margin-bottom: 15px;
+        }
+        
+        #robotCanvas {
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            border-radius: 8px;
+        }
+        
+        .telemetry {
+            background-color: #222;
+            color: #00ff00;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 80px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            flex-grow: 1;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .control-btn:hover {
+            background-color: #3b77db;
+        }
+        
+        .joystick-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .joystick {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .joystick-inner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #666;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 2;
+        }
+        
+        .joystick-label {
+            position: absolute;
+            bottom: -25px;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        .joystick-restrictions {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .vertical-only .joystick-restrictions {
+            width: 2px;
+            height: 100%;
+            top: 0;
+            left: 50%;
+        }
+        
+        .horizontal-only .joystick-restrictions-v {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        @media (max-width: 600px) {
+            .joystick {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .joystick-inner {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .control-btn {
+                padding: 8px 12px;
+                min-width: 70px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Robot Arm Control</h1>
+    
+    <!-- Canvas for 3D robot arm visualization -->
+    <div class="canvas-container">
+        <canvas id="robotCanvas"></canvas>
+    </div>
+    
+    <!-- Telemetry Data Section -->
+    <div class="telemetry">
+        <p>Position: X=0.00, Y=0.00, Z=0.00</p>
+        <p>Angles: Base=0°, Elbow=90°, Wrist=0°, Grip=0°</p>
+    </div>
+    
+    <!-- Control Buttons -->
+    <div class="controls">
+        <button class="control-btn">Start</button>
+        <button class="control-btn">Stop</button>
+        <button class="control-btn">Reset</button>
+        <button class="control-btn">Save Pose</button>
+        <button class="control-btn">Home</button>
+    </div>
+    
+    <!-- Joystick Controls -->
+    <div class="joystick-container">
+        <!-- Base Joystick - Horizontal and Vertical -->
+        <div class="joystick">
+            <div class="joystick-inner"></div>
+            <div class="joystick-label">Base</div>
+        </div>
+        
+        <!-- Elbow Joystick - Vertical Only -->
+        <div class="joystick vertical-only">
+            <div class="joystick-inner"></div>
+            <div class="joystick-restrictions"></div>
+            <div class="joystick-label">Elbow</div>
+        </div>
+        
+        <!-- Wrist Pitch/Yaw Joystick - Horizontal and Vertical -->
+        <div class="joystick">
+            <div class="joystick-inner"></div>
+            <div class="joystick-label">Wrist Pitch/Yaw</div>
+        </div>
+        
+        <!-- Wrist Roll/Grip Joystick - Now Horizontal and Vertical -->
+        <div class="joystick">
+            <div class="joystick-inner"></div>
+            <div class="joystick-label">Wrist Roll/Grip</div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all joysticks
+            const joysticks = document.querySelectorAll('.joystick');
+            let activeJoystick = null;
+            let joystickIndex = 0;
+            
+            // Initialize joysticks
+            joysticks.forEach((joystick, index) => {
+                const inner = joystick.querySelector('.joystick-inner');
+                const isVerticalOnly = joystick.classList.contains('vertical-only');
+                const isHorizontalOnly = joystick.classList.contains('horizontal-only');
+                
+                // Mouse Events
+                inner.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    activeJoystick = {
+                        joystick: joystick,
+                        inner: inner,
+                        isVerticalOnly: isVerticalOnly,
+                        isHorizontalOnly: isHorizontalOnly,
+                        index: index + 1,
+                        rect: joystick.getBoundingClientRect()
+                    };
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+                
+                // Touch Events
+                inner.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    activeJoystick = {
+                        joystick: joystick,
+                        inner: inner,
+                        isVerticalOnly: isVerticalOnly,
+                        isHorizontalOnly: isHorizontalOnly,
+                        index: index + 1,
+                        rect: joystick.getBoundingClientRect()
+                    };
+                    document.addEventListener('touchmove', handleTouchMove);
+                    document.addEventListener('touchend', handleTouchEnd);
+                });
+            });
+            
+            function handleMouseMove(e) {
+                if (!activeJoystick) return;
+                updateJoystickPosition(e.clientX, e.clientY);
+            }
+            
+            function handleTouchMove(e) {
+                if (!activeJoystick || !e.touches[0]) return;
+                updateJoystickPosition(e.touches[0].clientX, e.touches[0].clientY);
+            }
+            
+            function handleMouseUp() {
+                resetJoystick();
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+            
+            function handleTouchEnd() {
+                resetJoystick();
+                document.removeEventListener('touchmove', handleTouchMove);
+                document.removeEventListener('touchend', handleTouchEnd);
+            }
+            
+            function resetJoystick() {
+                if (!activeJoystick) return;
+                
+                // Reset joystick to center
+                activeJoystick.inner.style.left = '50%';
+                activeJoystick.inner.style.top = '50%';
+                activeJoystick.inner.style.transform = 'translate(-50%, -50%)';
+                
+                // Call onJoystickMove with zero values
+                onJoystickMove(activeJoystick.index, 0, 0);
+                
+                activeJoystick = null;
+            }
+            
+            function updateJoystickPosition(clientX, clientY) {
+                if (!activeJoystick) return;
+                
+                const rect = activeJoystick.rect;
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                // Calculate relative position from center
+                let dx = clientX - centerX;
+                let dy = clientY - centerY;
+                
+                // Restrict to vertical movement only
+                if (activeJoystick.isVerticalOnly) {
+                    dx = 0;
+                }
+                
+                // Restrict to horizontal movement only
+                if (activeJoystick.isHorizontalOnly) {
+                    dy = 0;
+                }
+                
+                // Calculate distance from center
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const maxDistance = rect.width / 2 - 20; // Radius minus inner radius
+                
+                // If distance is greater than max allowed, scale down
+                if (distance > maxDistance) {
+                    const scale = maxDistance / distance;
+                    dx *= scale;
+                    dy *= scale;
+                }
+                
+                // Calculate normalized values (-1 to 1)
+                const normalizedX = dx / maxDistance;
+                const normalizedY = dy / maxDistance;
+                
+                // Update position
+                activeJoystick.inner.style.left = `calc(50% + ${dx}px)`;
+                activeJoystick.inner.style.top = `calc(50% + ${dy}px)`;
+                activeJoystick.inner.style.transform = 'translate(-50%, -50%)';
+                
+                // Call onJoystickMove function
+                onJoystickMove(activeJoystick.index, normalizedX, normalizedY);
+            }
+            
+            // Function to handle joystick movement
+            function onJoystickMove(joystickNumber, x, y) {
+                console.log(`Joystick ${joystickNumber}: x=${x.toFixed(2)}, y=${y.toFixed(2)}`);
+                // This function can be expanded to control the robot arm
+                
+                // Update telemetry for demonstration
+                const telemetry = document.querySelector('.telemetry');
+                if (joystickNumber === 1) {
+                    // Base joystick
+                    telemetry.innerHTML = `<p>Position: X=${x.toFixed(2)}, Y=${(-y).toFixed(2)}, Z=0.00</p>
+                    <p>Angles: Base=${(x * 180).toFixed(0)}°, Elbow=90°, Wrist=0°, Grip=0°</p>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
