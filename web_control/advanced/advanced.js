@@ -1,25 +1,25 @@
 function startConnection() {
-    ws = new WebSocket('ws://rook:8765');
+    const socket = new WebSocket('ws://rook:8765');
 
     telemetry.status = 'Connecting...';
     updateTelemetry();
 
     // WebSocket event handlers
-    ws.onopen = () => {
+    socket.onopen = () => {
         telemetry.status = 'Connected';
         updateTelemetry();
     };
 
-    ws.onmessage = (event) => {
+    socket.onmessage = (event) => {
         console.log("Received message", event.data);
     };
 
-    ws.onclose = () => {
+    socket.onclose = () => {
         telemetry.status = 'Disconnected';
         updateTelemetry();
     };
 
-    ws.onclose = () => {
+    socket.onclose = () => {
         telemetry.status = 'Connecting...'
         updateTelemetry();
         
@@ -28,7 +28,7 @@ function startConnection() {
         }, 5000);
     };
     // Function to send slider data
-    
+    return socket; 
 
 }
 

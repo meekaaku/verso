@@ -216,9 +216,11 @@
     </div>
     
     <script>
-        var telemetry = [];
         document.addEventListener('DOMContentLoaded', function() {
-            startConnection();
+            telemetry = {};
+            const ws = startConnection();
+            const joystickPositions = {base_yaw: 0, base_pitch: 0, elbow_pitch: 0, wrist_pitch: 0, wrist_yaw: 0, wrist_roll: 0, grip: 0};
+
             // Get all joysticks
             const joysticks = document.querySelectorAll('.joystick');
             let activeJoystick = null;
@@ -294,7 +296,7 @@
                 activeJoystick.inner.style.transform = 'translate(-50%, -50%)';
                 
                 // Call onJoystickMove with zero values
-                onJoystickMove(activeJoystick.index, 0, 0);
+                onJoystickMove(activeJoystick.id, 0, 0);
                 
                 activeJoystick = null;
             }
@@ -341,31 +343,37 @@
                 activeJoystick.inner.style.transform = 'translate(-50%, -50%)';
                 
                 // Call onJoystickMove function
-                onJoystickMove(activeJoystick.id, normalizedX.toFixed(2), normalizedY.toFixed(2));
+                onJoystickMove(activeJoystick.id, normalizedX.toFixed(2), -normalizedY.toFixed(2));
             }
             
             // Function to handle joystick movement
             function onJoystickMove(id, x, y) {
 
                 if (id === 'base') {
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_yaw', value:  Number(x)}}));
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_pitch', value: Number(y)}}));
+                    joystickPositions.base_yaw = x;
+                    joystickPositions.base_pitch = y;
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_yaw', value:  Number(x)}}));
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_pitch', value: Number(y)}}));
                 }
                 else if (id === 'elbow') {
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'elbow_pitch', value: Number(y)}}));
+                    joystickPositions.elbow_pitch = y;
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'elbow_pitch', value: Number(y)}}));
                 }
                 else if (id === 'wristpitchyaw') {
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_pitch', value: Number(y)}}));
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_yaw', value: Number(x)}}));
+                    joystickPositions.wrist_pitch = y;
+                    joystickPositions.wrist_yaw = x;
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_pitch', value: Number(y)}}));
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_yaw', value: Number(x)}}));
                 }
                 else if (id === 'wristrollgrip') {
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_roll', value: Number(x)}}));
-                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'grip', value: Number(y)}}));
+                    joystickPositions.wrist_roll = x;
+                    joystickPositions.grip = y;
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_roll', value: Number(x)}}));
+                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'grip', value: Number(y)}}));
                 }
                 
                 
 
-                telemetry = {} 
                 telemetry.status = "Connected";
                 // This function can be expanded to control the robot arm
                 
@@ -390,6 +398,18 @@
                 updateTelemetry();
 
             }
+
+            function sendJoystickData() {
+                const ids = Object.keys(joystickPositions);
+                ids.forEach(id => {
+                    if(joystickPositions[id] && Math.abs(joystickPositions[id]) > 0.1) {
+                        ws.send(JSON.stringify({command: "set_position_delta", data: {id: id, value: joystickPositions[id]}}));
+                    }
+                });
+            }
+
+
+            setInterval(sendJoystickData, 500);
         });
     </script>
 </body>
