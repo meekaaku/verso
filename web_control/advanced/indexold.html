@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verso Controller</title>
+    <script src="advanced.js"></script>
+    <link rel="stylesheet" href="style.css">
+  
+</head>
+<body>
+    <div class="slider-container">
+        <div id="connection-status" class="disconnected">
+            Disconnected
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Slider 1</span>
+                <span id="value1">50</span>
+            </div>
+            <input type="range" id="slider1" min="0" max="100" value="50">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Slider 2</span>
+                <span id="value2">50</span>
+            </div>
+            <input type="range" id="slider2" min="0" max="100" value="50">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Slider 3</span>
+                <span id="value3">50</span>
+            </div>
+            <input type="range" id="slider3" min="0" max="100" value="50">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Slider 4</span>
+                <span id="value4">50</span>
+            </div>
+            <input type="range" id="slider4" min="0" max="100" value="50">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Slider 5</span>
+                <span id="value5">50</span>
+            </div>
+            <input type="range" id="slider5" min="0" max="100" value="50">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Slider 6</span>
+                <span id="value6">512</span>
+            </div>
+            <input type="range" id="slider6" min="0" max="1023" value="512" oninput="sendSliderData(6)">
+        </div>
+    </div>
+
+    <script lang="javascript">
+        startConnection();
+    </script>
+
+    <!-- 
+    <script>
+        // WebSocket connection
+        const ws = new WebSocket('ws://rook:8765');
+        const statusElement = document.getElementById('connection-status');
+
+        // WebSocket event handlers
+        ws.onopen = () => {
+            statusElement.textContent = 'Connected';
+            statusElement.classList.remove('disconnected');
+            statusElement.classList.add('connected');
+        };
+
+        ws.onclose = () => {
+            statusElement.textContent = 'Disconnected';
+            statusElement.classList.remove('connected');
+            statusElement.classList.add('disconnected');
+        };
+
+        // Function to send slider data
+        function sendSliderData() {
+            if (ws.readyState === WebSocket.OPEN) {
+                const sliderData = {
+                    slider1: document.getElementById('slider1').value,
+                    slider2: document.getElementById('slider2').value,
+                    slider3: document.getElementById('slider3').value,
+                    slider4: document.getElementById('slider4').value,
+                    slider5: document.getElementById('slider5').value,
+                    slider6: document.getElementById('slider6').value
+                };
+                ws.send(JSON.stringify(sliderData));
+            }
+        }
+
+        // Add event listeners to all sliders
+        for (let i = 1; i <= 6; i++) {
+            const slider = document.getElementById(`slider${i}`);
+            const valueDisplay = document.getElementById(`value${i}`);
+            
+            slider.addEventListener('input', (e) => {
+                valueDisplay.textContent = e.target.value;
+                sendSliderData();
+            });
+        }
+
+        // Attempt to reconnect if connection is lost
+        ws.onclose = () => {
+            statusElement.textContent = 'Disconnected - Attempting to reconnect...';
+            statusElement.classList.remove('connected');
+            statusElement.classList.add('disconnected');
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        };
+    </script>
+-->
+</body>
+</html>

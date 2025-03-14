@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verso Controller</title>
+
+
+    <script src="advanced.js"></script>
     <style>
         * {
             margin: 0;
@@ -46,6 +49,10 @@
             border-radius: 8px;
             margin-bottom: 15px;
             min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
         }
         
         .controls {
@@ -168,8 +175,7 @@
     
     <!-- Telemetry Data Section -->
     <div class="telemetry">
-        <p>Position: X=0.00, Y=0.00, Z=0.00</p>
-        <p>Angles: Base=0°, Elbow=90°, Wrist=0°, Grip=0°</p>
+      
     </div>
     
     <!-- Control Buttons -->
@@ -184,33 +190,35 @@
     <!-- Joystick Controls -->
     <div class="joystick-container">
         <!-- Base Joystick - Horizontal and Vertical -->
-        <div class="joystick">
+        <div id="base" class="joystick">
             <div class="joystick-inner"></div>
             <div class="joystick-label">Base</div>
         </div>
         
         <!-- Elbow Joystick - Vertical Only -->
-        <div class="joystick vertical-only">
+        <div id="elbow" class="joystick vertical-only">
             <div class="joystick-inner"></div>
             <div class="joystick-restrictions"></div>
             <div class="joystick-label">Elbow</div>
         </div>
         
         <!-- Wrist Pitch/Yaw Joystick - Horizontal and Vertical -->
-        <div class="joystick">
+        <div id="wristpitchyaw" class="joystick">
             <div class="joystick-inner"></div>
             <div class="joystick-label">Wrist Pitch/Yaw</div>
         </div>
         
         <!-- Wrist Roll/Grip Joystick - Now Horizontal and Vertical -->
-        <div class="joystick">
+        <div id="wristrollgrip" class="joystick">
             <div class="joystick-inner"></div>
             <div class="joystick-label">Wrist Roll/Grip</div>
         </div>
     </div>
     
     <script>
+        var telemetry = [];
         document.addEventListener('DOMContentLoaded', function() {
+            startConnection();
             // Get all joysticks
             const joysticks = document.querySelectorAll('.joystick');
             let activeJoystick = null;
@@ -230,7 +238,8 @@
                         inner: inner,
                         isVerticalOnly: isVerticalOnly,
                         isHorizontalOnly: isHorizontalOnly,
-                        index: index + 1,
+                        index: index,
+                        id: joystick.id,
                         rect: joystick.getBoundingClientRect()
                     };
                     document.addEventListener('mousemove', handleMouseMove);
@@ -245,7 +254,8 @@
                         inner: inner,
                         isVerticalOnly: isVerticalOnly,
                         isHorizontalOnly: isHorizontalOnly,
-                        index: index + 1,
+                        index: index,
+                        id: joystick.id,
                         rect: joystick.getBoundingClientRect()
                     };
                     document.addEventListener('touchmove', handleTouchMove);
@@ -331,21 +341,54 @@
                 activeJoystick.inner.style.transform = 'translate(-50%, -50%)';
                 
                 // Call onJoystickMove function
-                onJoystickMove(activeJoystick.index, normalizedX, normalizedY);
+                onJoystickMove(activeJoystick.id, normalizedX.toFixed(2), normalizedY.toFixed(2));
             }
             
             // Function to handle joystick movement
-            function onJoystickMove(joystickNumber, x, y) {
-                console.log(`Joystick ${joystickNumber}: x=${x.toFixed(2)}, y=${y.toFixed(2)}`);
+            function onJoystickMove(id, x, y) {
+
+                if (id === 'base') {
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_yaw', value:  Number(x)}}));
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_pitch', value: Number(y)}}));
+                }
+                else if (id === 'elbow') {
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'elbow_pitch', value: Number(y)}}));
+                }
+                else if (id === 'wristpitchyaw') {
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_pitch', value: Number(y)}}));
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_yaw', value: Number(x)}}));
+                }
+                else if (id === 'wristrollgrip') {
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_roll', value: Number(x)}}));
+                    ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'grip', value: Number(y)}}));
+                }
+                
+                
+
+                telemetry = {} 
+                telemetry.status = "Connected";
                 // This function can be expanded to control the robot arm
                 
                 // Update telemetry for demonstration
-                const telemetry = document.querySelector('.telemetry');
-                if (joystickNumber === 1) {
+                /*
+                if (id === 'base') {
                     // Base joystick
-                    telemetry.innerHTML = `<p>Position: X=${x.toFixed(2)}, Y=${(-y).toFixed(2)}, Z=0.00</p>
-                    <p>Angles: Base=${(x * 180).toFixed(0)}°, Elbow=90°, Wrist=0°, Grip=0°</p>`;
+                    telemetry.base_yaw =  x.toFixed(2);
+                    telemetry.base_pitch = y.toFixed(2);
+                    telemetry.elbow_pitch = 90;
+                    telemetry.wrist_pitch = 0;
+                    telemetry.wrist_yaw = 0;
+                    telemetry.gripper_position = 0;
+                    telemetry.gripper_open = 0;
+                    telemetry.gripper_close = 0;
                 }
+                ws.send(JSON.stringify({joystick: joystickNumber, x: x, y: y}));
+                */
+
+                //const telemetryElement = document.querySelector('.telemetry');
+                //telemetryElement.innerHTML = Object.entries(telemetry).map(([key, value]) => `<div>${key}: ${value}</div>`).join("");
+                updateTelemetry();
+
             }
         });
     </script>

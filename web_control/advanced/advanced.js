@@ -1,12 +1,13 @@
 function startConnection() {
     ws = new WebSocket('ws://rook:8765');
-    const statusElement = document.getElementById('connection-status');
+
+    telemetry.status = 'Connecting...';
+    updateTelemetry();
 
     // WebSocket event handlers
     ws.onopen = () => {
-        statusElement.textContent = 'Connected';
-        statusElement.classList.remove('disconnected');
-        statusElement.classList.add('connected');
+        telemetry.status = 'Connected';
+        updateTelemetry();
     };
 
     ws.onmessage = (event) => {
@@ -14,15 +15,13 @@ function startConnection() {
     };
 
     ws.onclose = () => {
-        statusElement.textContent = 'Disconnected';
-        statusElement.classList.remove('connected');
-        statusElement.classList.add('disconnected');
+        telemetry.status = 'Disconnected';
+        updateTelemetry();
     };
 
     ws.onclose = () => {
-        statusElement.textContent = 'Disconnected - Attempting to reconnect...';
-        statusElement.classList.remove('connected');
-        statusElement.classList.add('disconnected');
+        telemetry.status = 'Connecting...'
+        updateTelemetry();
         
         setTimeout(() => {
             window.location.reload();
@@ -32,6 +31,13 @@ function startConnection() {
     
 
 }
+
+
+function updateTelemetry() {
+    const telemetryElement = document.querySelector('.telemetry');
+    telemetryElement.innerHTML = Object.entries(telemetry).map(([key, value]) => `<div>${key}: ${value}</div>`).join("");
+}
+
 
 function sendSliderData(n) {
     console.log("Sending slider data", n);
