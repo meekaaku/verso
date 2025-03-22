@@ -6,8 +6,8 @@ import time
 
 
 
-portHandler = PortHandler('COM12')
-#portHandler = PortHandler('/dev/ttyUSB0')
+#portHandler = PortHandler('COM12')
+portHandler = PortHandler('/dev/ttyUSB0')
 packetHandler = PacketHandler(1.0)
 if portHandler.setBaudRate(1000000):
     pass
@@ -17,7 +17,7 @@ else:
 
 
 
-j1 = mxDynamixel(2, 'AX-12A', portHandler, packetHandler)
+j1 = mxDynamixel(9, 'AX-12A', portHandler, packetHandler)
 j1.set_torque(True)
 j1.set_speed(300)
 j1.set_cw_limit(200)
