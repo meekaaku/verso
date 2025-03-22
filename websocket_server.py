@@ -28,10 +28,44 @@ async def handle_message(websocket):
             if(parsed["command"] == "set_position_delta"):
                 set_position_delta(parsed["data"])
 
+           
+            telemetry = json.dumps(get_telemetry())
+
             # Echo the message back to the client
-            await websocket.send(f"Echo: {message}")
+            await websocket.send(telemetry)
+
+
+
     except websockets.ConnectionClosed:
         print("Client disconnected")
+
+
+def get_telemetry():
+    by = base_yaw.get_position()
+    by = by.data
+
+    bp = base_pitch.get_position()
+    bp = bp.data
+
+
+    ep = elbow_pitch.get_position()
+    ep = ep.data
+
+
+    wp = wrist_pitch.get_position()
+    wp = wp.data
+
+    wy = wrist_yaw.get_position()
+    wy = wy.data
+
+    wr = wrist_roll.get_position()
+    wr = wr.data
+
+    g = grip.get_position()
+    g = g.data
+
+
+    return {"command": "telemetry", "data": {"base_yaw": by, "base_pitch": bp, "elbow_pitch": ep, "wrist_pitch": wy, "wrist_yaw": wy, "wrist_roll" : wr, "grip": g}}
 
 
 
@@ -68,7 +102,7 @@ def set_position_delta(data):
         print("Error: Could not get position")
         return
 
-    newpos =  pos_data.data + int(float(data["value"]) * 40)
+    newpos =  pos_data.data + int(float(data["value"]) * 10)
     servo.set_position(newpos)
 
 

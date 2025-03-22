@@ -1,17 +1,24 @@
 function startConnection() {
     const socket = new WebSocket('ws://rook:8765');
 
-    telemetry.status = 'Connecting...';
+    telemetry._status = 'connecting...';
     updateTelemetry();
 
     // WebSocket event handlers
     socket.onopen = () => {
-        telemetry.status = 'Connected';
+        telemetry._status = 'connected';
         updateTelemetry();
     };
 
     socket.onmessage = (event) => {
-        console.log("Received message", event.data);
+	const message = JSON.parse(event.data);
+	console.log("Received command", message.command);
+	if(message.command == "telemetry") {
+		telemetry = message.data;
+		telemetry._status = "connected"
+		updateTelemetry()
+
+	}
     };
 
     socket.onclose = () => {
@@ -20,7 +27,7 @@ function startConnection() {
     };
 
     socket.onclose = () => {
-        telemetry.status = 'Connecting...'
+        telemetry._status = 'connecting...'
         updateTelemetry();
         
         setTimeout(() => {
@@ -35,7 +42,8 @@ function startConnection() {
 
 function updateTelemetry() {
     const telemetryElement = document.querySelector('.telemetry');
-    telemetryElement.innerHTML = Object.entries(telemetry).map(([key, value]) => `<div>${key}: ${value}</div>`).join("");
+	const sorted = Object.entries(telemetry).sort((a,b) => a[0] < b[0] ? -1 : 1)
+    telemetryElement.innerHTML = sorted.map(([key, value]) => `<div>${key}: ${value}</div>`).join("");
 }
 
 

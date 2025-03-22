@@ -374,7 +374,6 @@
                 
                 
 
-                telemetry.status = "Connected";
                 // This function can be expanded to control the robot arm
                 
                 // Update telemetry for demonstration
@@ -402,14 +401,14 @@
             function sendJoystickData() {
                 const ids = Object.keys(joystickPositions);
                 ids.forEach(id => {
-                    if(joystickPositions[id] && Math.abs(joystickPositions[id]) > 0.1) {
+                    if(joystickPositions[id] && Math.abs(joystickPositions[id]) > 0.5) {
                         ws.send(JSON.stringify({command: "set_position_delta", data: {id: id, value: joystickPositions[id]}}));
                     }
                 });
             }
 
 
-            setInterval(sendJoystickData, 50);
+            setInterval(sendJoystickData, 10);
         });
     </script>
 </body>
