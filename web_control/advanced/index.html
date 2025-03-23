@@ -29,7 +29,8 @@
         
         .canvas-container {
             width: 100%;
-            height: 40vh;
+            height: 2vh;
+	    display: none;
             min-height: 200px;
             margin-bottom: 15px;
         }
@@ -48,7 +49,7 @@
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 15px;
-            min-height: 80px;
+            height: 300px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -352,53 +353,23 @@
                 if (id === 'base') {
                     joystickPositions.base_yaw = x;
                     joystickPositions.base_pitch = y;
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_yaw', value:  Number(x)}}));
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'base_pitch', value: Number(y)}}));
                 }
                 else if (id === 'elbow') {
                     joystickPositions.elbow_pitch = y;
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'elbow_pitch', value: Number(y)}}));
                 }
                 else if (id === 'wristpitchyaw') {
                     joystickPositions.wrist_pitch = y;
                     joystickPositions.wrist_yaw = x;
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_pitch', value: Number(y)}}));
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_yaw', value: Number(x)}}));
                 }
                 else if (id === 'wristrollgrip') {
                     joystickPositions.wrist_roll = x;
                     joystickPositions.grip = y;
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'wrist_roll', value: Number(x)}}));
-                    //ws.send(JSON.stringify({command: "set_position_delta", data: {id: 'grip', value: Number(y)}}));
                 }
-                
-                
 
-                // This function can be expanded to control the robot arm
-                
-                // Update telemetry for demonstration
-                /*
-                if (id === 'base') {
-                    // Base joystick
-                    telemetry.base_yaw =  x.toFixed(2);
-                    telemetry.base_pitch = y.toFixed(2);
-                    telemetry.elbow_pitch = 90;
-                    telemetry.wrist_pitch = 0;
-                    telemetry.wrist_yaw = 0;
-                    telemetry.gripper_position = 0;
-                    telemetry.gripper_open = 0;
-                    telemetry.gripper_close = 0;
-                }
-                ws.send(JSON.stringify({joystick: joystickNumber, x: x, y: y}));
-                */
-
-                //const telemetryElement = document.querySelector('.telemetry');
-                //telemetryElement.innerHTML = Object.entries(telemetry).map(([key, value]) => `<div>${key}: ${value}</div>`).join("");
-                updateTelemetry();
 
             }
 
-            function sendJoystickData() {
+            async function sendJoystickData() {
                 const ids = Object.keys(joystickPositions);
                 ids.forEach(id => {
                     if(joystickPositions[id] && Math.abs(joystickPositions[id]) > 0.5) {
@@ -408,7 +379,7 @@
             }
 
 
-            setInterval(sendJoystickData, 10);
+            setInterval(sendJoystickData, 200);
         });
     </script>
 </body>

@@ -20,18 +20,15 @@ async def handle_message(websocket):
     try:
         # Keep the connection open and listen for messages
         async for message in websocket:
-            print(f"Received message: {message}")
-            parsed = json.loads(message)
+            request = json.loads(message)
+            print(request)
 
+            if(request["command"] == "set_position_delta"):
+                set_position_delta(request)
 
-
-            if(parsed["command"] == "set_position_delta"):
-                set_position_delta(parsed["data"])
-
-           
             telemetry = json.dumps(get_telemetry())
 
-            # Echo the message back to the client
+            # send telemetry
             await websocket.send(telemetry)
 
 
@@ -65,12 +62,12 @@ def get_telemetry():
     g = g.data
 
 
-    return {"command": "telemetry", "data": {"base_yaw": by, "base_pitch": bp, "elbow_pitch": ep, "wrist_pitch": wy, "wrist_yaw": wy, "wrist_roll" : wr, "grip": g}}
+    return {"command": "telemetry", "data": {"base_yaw": by, "base_pitch": bp, "elbow_pitch": ep, "wrist_pitch": wp, "wrist_yaw": wy, "wrist_roll" : wr, "grip": g}}
 
 
 
-def set_position_delta(data):
-    id = data["id"]
+def set_position_delta(request):
+    id = request["data"]["id"]
     if(id == None):
         print("Invalid id")
         return
@@ -97,12 +94,23 @@ def set_position_delta(data):
         return
 
 
-    pos_data = servo.get_position()
-    if(pos_data.ok == False):
+    response = servo.get_position()
+    if(response.ok == False):
         print("Error: Could not get position")
         return
 
-    newpos =  pos_data.data + int(float(data["value"]) * 10)
+    value = float(request["data"]["value"])
+    
+    delta = 0
+    if(value < 0):
+        delta = -100
+    else:
+        delta = 100
+
+    #delta = int(50 * value)
+
+    #newpos =  response.data + int(float(data["data"]["value"]) * 30)
+    newpos = response.data + delta
     servo.set_position(newpos)
 
 

@@ -106,10 +106,10 @@ class mxDynamixel:
         
         # Extract values
         if is_three_tuple:
-            response, com_result, error = results
+            data, com_result, error = results
         else:
             com_result, error = results
-            response = None
+            data = None
         
         # Check if operation was successful
         is_ok = com_result == 0 and error == 0
@@ -124,7 +124,7 @@ class mxDynamixel:
 
         return mxResponse(
             ok = is_ok,
-            data = response if is_three_tuple else None,
+            data = data if is_three_tuple else None,
             error = None if is_ok else 'Unknown error'
         )
 
