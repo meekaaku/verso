@@ -1,3 +1,6 @@
+# A higher level libary to manage Dyanmixel servos
+
+
 # Address and Size of a control table entry
 class AddressSize:
     def __init__(self, address, size):
