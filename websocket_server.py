@@ -7,10 +7,11 @@ from lib import mxDynamixel, mxRequest
 import time
 
 
-base_pitch = None
-base_yaw = None
 portHandler = None
 packetHandler = None
+
+# dictionary of servos
+verso = {}  
 
 
 
@@ -22,8 +23,8 @@ async def handle_message(websocket):
             request = json.loads(message)
             print(request)
 
-            if(request["command"] == "set_position_delta"):
-                set_position_delta(request)
+            if(request["command"] == "change_position"):
+                change_position(request)
 
             telemetry = json.dumps(get_telemetry())
 
@@ -65,7 +66,7 @@ def get_telemetry():
 
 
 
-def set_position_delta(request):
+def change_position(request):
     id = request["data"]["id"]
     if(id == None):
         print("Invalid id")
@@ -128,6 +129,8 @@ def setup_verso():
         quit()
         
  
+
+    verso['base_yaw'] = mxDynamixel(3, 'AX-12A', portHandler, packetHandler)
 
     global base_yaw, base_pitch,  elbow_pitch, wrist_pitch, wrist_yaw, wrist_roll, grip
     base_yaw = mxDynamixel(3, 'AX-12A', portHandler, packetHandler)
