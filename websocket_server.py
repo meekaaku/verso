@@ -68,50 +68,28 @@ def get_telemetry():
 
 def change_position(request):
     id = request["data"]["id"]
-    if(id == None):
+    if id not in verso['ids']
         print("Invalid id")
         return
 
-    servo = None
 
-
-    if(id == "base_yaw"):
-        servo = base_yaw
-    elif(id == "base_pitch"):
-        servo = base_pitch
-    elif(id == "elbow_pitch"):
-        servo = elbow_pitch
-    elif(id == "wrist_pitch"):
-        servo = wrist_pitch
-    elif(id == "wrist_yaw"):
-        servo = wrist_yaw
-    elif (id == "wrist_roll"):
-        servo = wrist_roll
-    elif(id == "grip"):
-        servo = grip
-    else:
-        print("Invalid servo")
-        return
-
-
-    response = servo.get_position()
+    response = verso[id].get_position()
     if(response.ok == False):
         print("Error: Could not get position")
         return
 
     value = float(request["data"]["value"])
     
+    # TODO: need a better way of doing fine control
     delta = 0
     if(value < 0):
         delta = -100
     else:
         delta = 100
 
-    #delta = int(50 * value)
 
-    #newpos =  response.data + int(float(data["data"]["value"]) * 30)
     newpos = response.data + delta
-    servo.set_position(newpos)
+    verso[id].set_position(newpos)
 
 
 
@@ -130,8 +108,23 @@ def setup_verso():
         
  
 
+    verso['ids'] = ['base_pitch', 'base_yaw', 'elbow_pitch', 'wrist_pitch', 'wrist_yaw', 'wrist_roll', 'grip']
+    verso['base_pitch'] = mxDynamixel(2, 'AX-12A', portHandler, packetHandler)
     verso['base_yaw'] = mxDynamixel(3, 'AX-12A', portHandler, packetHandler)
+    verso['elbow_pitch'] = mxDynamixel(4, 'AX-12A', portHandler, packetHandler)
+    verso['wrist_pitch'] = mxDynamixel(5, 'AX-12A', portHandler, packetHandler)
+    verso['wrist_yaw'] = mxDynamixel(6, 'AX-12A', portHandler, packetHandler)
+    verso['wrist_roll'] = mxDynamixel(7, 'AX-12A', portHandler, packetHandler)
+    verso['grip'] = mxDynamixel(9, 'AX-12A', portHandler, packetHandler)
 
+    for s in verso['ids']:
+        verso[s].set_torque(True)
+        verso[s].set_speed(100)
+
+
+        
+
+    """"
     global base_yaw, base_pitch,  elbow_pitch, wrist_pitch, wrist_yaw, wrist_roll, grip
     base_yaw = mxDynamixel(3, 'AX-12A', portHandler, packetHandler)
     base_yaw.set_torque(True)
@@ -162,6 +155,7 @@ def setup_verso():
     grip = mxDynamixel(9, 'AX-12A', portHandler, packetHandler)
     grip.set_torque(True)
     grip.set_speed(100)
+    """
 
 
 
