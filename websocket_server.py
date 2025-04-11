@@ -78,17 +78,25 @@ def change_position(request):
         print("Error: Could not get position")
         return
 
+
+    # the value will be from -1 to +1
     value = float(request["data"]["value"])
-    
-    # TODO: need a better way of doing fine control
+
     delta = 0
-    if(value < 0):
-        delta = -100
+    speed = 0
+    if(abs(value) < 0.5):
+        delta = 20
+        speed = 20
     else:
         delta = 100
+        speed = 100
 
+    if(value < 0):
+        delta = -delta
 
     newpos = response.data + delta
+    verso[id].set_speed(speed)
+    time.sleep(50/1000) # 50ms
     verso[id].set_position(newpos)
 
 
