@@ -19,3 +19,14 @@ For smart servos, I am using Dynamixel AX-12A from [Robotis](https://www.robotis
 - 
 
 ### Software 
+
+
+### How to run
+
+`source env/bin/activate`
+`cd web_control`
+`python3 -m http.server`
+
+`cd ../`
+`python3 websocket_server.py`
+
