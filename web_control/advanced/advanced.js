@@ -1,5 +1,5 @@
 function startConnection() {
-    const socket = new WebSocket('ws://rook:8765');
+    const socket = new WebSocket('ws://pi3:8765');
 
     telemetry._status = 'connecting...';
     updateTelemetry();

@@ -1,6 +1,6 @@
 function onConnectClick() {
     console.log("Connecting...");
-    ws = new WebSocket('ws://rook:8765');
+    ws = new WebSocket('ws://pi3:8765');
 
     ws.onopen = () => {
         console.log("Connected");

@@ -4,6 +4,7 @@ import websockets
 import json
 from dynamixel_sdk import PortHandler, PacketHandler
 from lib import mxDynamixel, mxRequest
+from serial.tools import list_ports
 import time
 
 
@@ -13,6 +14,16 @@ packetHandler = None
 # dictionary of servos
 verso = {}  
 
+
+def find_ft232h_port():
+    for port in list_ports.comports():
+        print(port.device)
+        identity = " ".join(
+            filter(None, [port.description, port.manufacturer, port.product, port.hwid])
+        )
+        if "FT232H" in identity:
+            return port.device
+    return None
 
 
 # Define the WebSocket handler function
@@ -38,31 +49,10 @@ async def handle_message(websocket):
 
 
 def get_telemetry():
-    by = base_yaw.get_position()
-    by = by.data
-
-    bp = base_pitch.get_position()
-    bp = bp.data
-
-
-    ep = elbow_pitch.get_position()
-    ep = ep.data
-
-
-    wp = wrist_pitch.get_position()
-    wp = wp.data
-
-    wy = wrist_yaw.get_position()
-    wy = wy.data
-
-    wr = wrist_roll.get_position()
-    wr = wr.data
-
-    g = grip.get_position()
-    g = g.data
-
-
-    return {"command": "telemetry", "data": {"base_yaw": by, "base_pitch": bp, "elbow_pitch": ep, "wrist_pitch": wp, "wrist_yaw": wy, "wrist_roll" : wr, "grip": g}}
+    data = {}
+    for id in verso['ids']:
+        data[id] = verso[id].get_position().data
+    return {"command": "telemetry", "data": data}
 
 
 
@@ -106,7 +96,16 @@ def change_position(request):
 
 
 def setup_verso():
-    portHandler = PortHandler('/dev/ttyUSB0')
+    device = find_ft232h_port()
+    if device is None:
+        print("FT232H Dynamixel USB adapter not found")
+        #quit()
+
+
+    device = "/dev/ttyUSB0"
+    print(f"Using Dynamixel adapter on {device}")
+
+    portHandler = PortHandler(device)
     packetHandler = PacketHandler(1.0)
     if portHandler.setBaudRate(1000000):
         pass

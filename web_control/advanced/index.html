@@ -373,7 +373,7 @@
                 const ids = Object.keys(joystickPositions);
                 ids.forEach(id => {
                     if(joystickPositions[id] && Math.abs(joystickPositions[id]) > 0.5) {
-                        ws.send(JSON.stringify({command: "set_position_delta", data: {id: id, value: joystickPositions[id]}}));
+                        ws.send(JSON.stringify({command: "change_position", data: {id: id, value: joystickPositions[id]}}));
                     }
                 });
             }
