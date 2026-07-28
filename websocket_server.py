@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import asyncio
 import websockets
 import json
@@ -68,7 +68,7 @@ def get_telemetry():
 
 def change_position(request):
     id = request["data"]["id"]
-    if id not in verso['ids']
+    if id not in verso['ids']:
         print("Invalid id")
         return
 
