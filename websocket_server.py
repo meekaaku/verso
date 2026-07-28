@@ -17,11 +17,10 @@ verso = {}
 
 def find_ft232h_port():
     for port in list_ports.comports():
-        print(port.device)
         identity = " ".join(
             filter(None, [port.description, port.manufacturer, port.product, port.hwid])
         )
-        if "FT232H" in identity:
+        if "Serial Converter" in identity:
             return port.device
     return None
 
@@ -98,11 +97,9 @@ def change_position(request):
 def setup_verso():
     device = find_ft232h_port()
     if device is None:
-        print("FT232H Dynamixel USB adapter not found")
-        #quit()
+        print("Dynamixel USB Serial Converter not found")
+        quit()
 
-
-    device = "/dev/ttyUSB0"
     print(f"Using Dynamixel adapter on {device}")
 
     portHandler = PortHandler(device)
